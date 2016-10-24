@@ -13,6 +13,7 @@ protected:
     uint16_t port;
     Jitterbuffer jitterbuffer;
     void *decoderState;
+    int timeout;
 
 public:
     Endpoint(uint32_t ip, uint16_t port);
@@ -21,6 +22,8 @@ public:
     uint16_t getPort() const { return port; }
     void addPacket(int len, const RtpPacket &packet);
     void dequeueAudio(float *buf);
+    void resetTimeout();
+    bool timePassed(int timeDelta);
 };
 
 class EndpointCollection
@@ -32,10 +35,11 @@ protected:
 public:
     EndpointCollection();
     ~EndpointCollection();
-    void addEndpointIfMissing(uint32_t ip, uint16_t port);
+    void update(uint32_t ip, uint16_t port);
     std::vector<Endpoint*>& getAllEndpoints() { return endpoints; }
     void addPacket(int len, const RtpPacket &packet, uint32_t ip, uint16_t port);
     void getAudio(float *buf);
+    void handleTimeout(int timeDelta);
 };
 
 #endif

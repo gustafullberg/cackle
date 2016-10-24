@@ -53,8 +53,6 @@ int main()
     
     Pa_StartStream(stream);
 
-    float inputFrame[FRAME_LEN];
-
     int64_t time = getTimeInMilliseconds();
     uint32_t ip;
     uint16_t port;
@@ -67,8 +65,9 @@ int main()
         // Handle heartbeats
         discoverySocket.sendHeartbeatIfTime(timeDelta);
         while(discoverySocket.receiveHeartbeat(ip, port)) {
-            state.endpoints.addEndpointIfMissing(ip, port);
+            state.endpoints.update(ip, port);
         }
+        state.endpoints.handleTimeout(timeDelta);
 
         // Send media packets queued for transmission
         int packetLen;

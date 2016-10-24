@@ -34,6 +34,10 @@ DiscoverySocket::DiscoverySocket(uint16_t _portToAnnounce)
         exit(1);
     }
 
+    // Allow port to be bound by several sockets on the same system
+    int optval = 1;
+    setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+
     // Bind socket to port
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -113,7 +117,7 @@ bool DiscoverySocket::receiveHeartbeat(uint32_t &ip, uint16_t &port)
     if(len > 0) {
         ip = ntohl(remote_addr.sin_addr.s_addr);
         port = ntohs(msg.port);
-        fprintf(stderr, "Host %s is announcing port %d\n", inet_ntoa(remote_addr.sin_addr), port, len);
+        //fprintf(stderr, "Host %s is announcing port %d\n", inet_ntoa(remote_addr.sin_addr), port, len);
         return true;
     }
 
