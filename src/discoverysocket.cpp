@@ -113,7 +113,7 @@ bool DiscoverySocket::receiveHeartbeat(uint32_t &ip, uint16_t &port)
     HeartbeatMsg msg;
 
     // Receive (non-blocking)
-    int len = recvfrom(s, &msg, sizeof(msg), 0, (struct sockaddr*)&remote_addr, &addr_len);
+    ssize_t len = recvfrom(s, &msg, sizeof(msg), 0, (struct sockaddr*)&remote_addr, &addr_len);
     if(len > 0) {
         ip = ntohl(remote_addr.sin_addr.s_addr);
         port = ntohs(msg.port);

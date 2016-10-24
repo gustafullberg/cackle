@@ -53,7 +53,7 @@ EndpointCollection::EndpointCollection()
 EndpointCollection::~EndpointCollection()
 {
     std::lock_guard<std::mutex> guard(mutex);
-    for(int i = 0; i < endpoints.size(); i++) {
+    for(int i = 0; i < (int)endpoints.size(); i++) {
         delete endpoints[i];
     }
 }
@@ -106,7 +106,7 @@ void EndpointCollection::getAudio(float *buf)
 
 void EndpointCollection::handleTimeout(int timeDelta)
 {
-    for(int i = endpoints.size() - 1; i >= 0; i--) {
+    for(int i = (int)endpoints.size() - 1; i >= 0; i--) {
         if(endpoints[i]->timePassed(timeDelta)) {
             uint32_t ip = endpoints[i]->getIP();
             uint16_t port = endpoints[i]->getPort();

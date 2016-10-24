@@ -25,7 +25,6 @@ void Encoder::enqueueAudio(float *buf)
 bool Encoder::dequeuePacket(RtpPacket &packet, int &len)
 {
     float inputFrame[FRAME_LEN];
-    int packetLen = 0;
         
     bool audioAvailable = queue.hasData();
     if(!audioAvailable) return false;
@@ -46,7 +45,7 @@ bool Encoder::dequeuePacket(RtpPacket &packet, int &len)
     
     // Construct header of RTP packet
     packet.setHeader(seqNo, timestamp);
-    len += sizeof(packet.header);
+    len += (int)sizeof(packet.header);
 
     return true;
 }

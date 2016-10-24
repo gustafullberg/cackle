@@ -4,8 +4,8 @@
 
 bool VoiceActivityDetector::isSpeech(const float *buf)
 {
-    const float adaptUp   = 0.00001;
-    const float adaptDown = 0.05;
+    const float adaptUp   = 0.00001f;
+    const float adaptDown = 0.05f;
     
     float energy = 0.0f;
     for(int i = 0; i < FRAME_LEN; i++) {

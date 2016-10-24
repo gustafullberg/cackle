@@ -78,7 +78,7 @@ int main()
         while(discoverySocket.receiveHeartbeat(ip, port)) {
             state.endpoints.update(ip, port);
         }
-        state.endpoints.handleTimeout(timeDelta);
+        state.endpoints.handleTimeout((int)timeDelta);
 
         // Send media packets queued for transmission
         int packetLen;

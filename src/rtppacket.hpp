@@ -16,14 +16,14 @@ struct RtpPacket
         header[ 1] = 0;
         
         // Sequence number
-        header[ 2] = (seqNo >> 8);
-        header[ 3] = (seqNo & 0xFF);
+        header[ 2] = (unsigned char)(seqNo >> 8);
+        header[ 3] = (unsigned char)(seqNo & 0xFF);
         
         // Timestamp
-        header[ 4] = (timestamp >> 24) & 0xFF;
-        header[ 5] = (timestamp >> 16) & 0xFF;
-        header[ 6] = (timestamp >>  8) & 0xFF;
-        header[ 7] = (timestamp >>  0) & 0xFF;
+        header[ 4] = (unsigned char)((timestamp >> 24) & 0xFF);
+        header[ 5] = (unsigned char)((timestamp >> 16) & 0xFF);
+        header[ 6] = (unsigned char)((timestamp >>  8) & 0xFF);
+        header[ 7] = (unsigned char)((timestamp >>  0) & 0xFF);
         
         // SSRC identifier
         header[ 8] = 0;

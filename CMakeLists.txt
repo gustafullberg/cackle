@@ -1,4 +1,10 @@
 project(cackle)
+set(CMAKE_CXX_STANDARD 11)
+
+if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang"))
+    # As much compiler warnings as possible
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion")
+endif()
 
 set(SRC
     src/audioqueue.hpp

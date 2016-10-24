@@ -41,7 +41,7 @@ MediaSocket::~MediaSocket()
     close(s);
 }
 
-void MediaSocket::send(const void *buffer, int len, uint64_t ip, uint16_t port)
+void MediaSocket::send(const void *buffer, int len, uint32_t ip, uint16_t port)
 {
     // Address
     struct sockaddr_in remote_addr;
@@ -59,7 +59,7 @@ bool MediaSocket::receive(void *buffer, int bufLen, int &len, uint32_t &ip, uint
     socklen_t addr_len = sizeof(remote_addr);
 
     // Receive (non-blocking)
-    len = recvfrom(s, buffer, bufLen, 0, (struct sockaddr*)&remote_addr, &addr_len);
+    len = (int)recvfrom(s, buffer, bufLen, 0, (struct sockaddr*)&remote_addr, &addr_len);
     if(len > 0) {
         ip = ntohl(remote_addr.sin_addr.s_addr);
         port = ntohs(remote_addr.sin_port);

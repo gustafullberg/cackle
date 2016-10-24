@@ -13,7 +13,7 @@ protected:
 public:
     MediaSocket();
     ~MediaSocket();
-    void send(const void *buffer, int len, uint64_t ip, uint16_t port);
+    void send(const void *buffer, int len, uint32_t ip, uint16_t port);
     bool receive(void *buffer, int bufLen, int &len, uint32_t &ip, uint16_t &port);
     uint16_t getPortNumber();
 };
