@@ -18,6 +18,7 @@ protected:
     
 public:
     Encoder();
+    ~Encoder();
     void enqueueAudio(float *buf);
     bool dequeuePacket(RtpPacket &packet, int &len);
 };

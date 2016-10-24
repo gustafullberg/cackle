@@ -11,6 +11,11 @@ Encoder::Encoder()
     timestamp = 0;
 }
 
+Encoder::~Encoder()
+{
+    opus_encoder_destroy((OpusEncoder*)encoderState);
+}
+
 void Encoder::enqueueAudio(float *buf)
 {
     float *p = vad.isSpeech(buf) ? buf : zeroFrame;

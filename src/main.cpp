@@ -3,6 +3,7 @@
 #include <chrono>
 #include <portaudio.h>
 #include <iostream>
+#include <csignal>
 #include "encoder.hpp"
 #include "mediasocket.hpp"
 #include "discoverysocket.hpp"
@@ -12,6 +13,8 @@ struct State {
     Encoder encoder;
     EndpointCollection endpoints;
 };
+
+static volatile bool quit = 0;
 
 int audioCallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData)
 {
@@ -37,6 +40,11 @@ int64_t getTimeInMilliseconds()
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
+void intHandler(int dummy)
+{
+    quit = true;
+}
+
 int main()
 {
     Pa_Initialize();
@@ -47,6 +55,9 @@ int main()
     RtpPacket receivePacket;
     MediaSocket mediaSocket;
     DiscoverySocket discoverySocket(mediaSocket.getPortNumber());
+
+    // Take care of Ctrl-C
+    signal(SIGINT, intHandler);
     
     err = Pa_OpenDefaultStream(&stream, 1, 1, paFloat32, FS, FRAME_LEN, audioCallback, (void*)&state);
     if(err != paNoError) return 1;
@@ -57,7 +68,7 @@ int main()
     uint32_t ip;
     uint16_t port;
     
-    while(1) {
+    while(!quit) {
         // Time elapsed since last iteration
         uint64_t timeDelta = getTimeInMilliseconds() - time;
         time += timeDelta;
@@ -91,6 +102,8 @@ int main()
     
     Pa_StopStream(stream);
     Pa_Terminate();
+
+    fprintf(stderr, "\nBye!\n");
     
     return 0;
 }
