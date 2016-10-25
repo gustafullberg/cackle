@@ -16,9 +16,10 @@ Encoder::~Encoder()
     opus_encoder_destroy((OpusEncoder*)encoderState);
 }
 
-void Encoder::enqueueAudio(float *buf)
+void Encoder::enqueueAudio(const float *buf)
 {
-    float *p = vad.isSpeech(buf) ? buf : zeroFrame;
+    float zeroFrame[FRAME_LEN] = { 0.0f };
+    const float *p = vad.isSpeech(buf) ? buf : zeroFrame;
     queue.enqueue(p);
 }
 

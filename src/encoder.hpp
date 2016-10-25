@@ -14,12 +14,11 @@ protected:
     VoiceActivityDetector vad;
     uint16_t seqNo;
     uint32_t timestamp;
-    float zeroFrame[FRAME_LEN] = { 0.0f };
     
 public:
     Encoder();
     ~Encoder();
-    void enqueueAudio(float *buf);
+    void enqueueAudio(const float *buf);
     bool dequeuePacket(RtpPacket &packet, int &len);
 };
 

@@ -1,10 +1,15 @@
 #include <cstdio>
 #include <cstdlib>
 #include <sys/types.h>
+#ifdef _MSC_VER
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include "discoverysocket.hpp"
 
@@ -34,9 +39,11 @@ DiscoverySocket::DiscoverySocket(uint16_t _portToAnnounce)
         exit(1);
     }
 
+#ifndef _MSC_VER
     // Allow port to be bound by several sockets on the same system
     int optval = 1;
     setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+#endif
 
     // Bind socket to port
     struct sockaddr_in addr;
@@ -70,18 +77,27 @@ DiscoverySocket::DiscoverySocket(uint16_t _portToAnnounce)
 #endif
 
     // Make socket non-blocking
+#ifdef _MSC_VER
+    unsigned long nonblocking = 1;
+    ioctlsocket(s, FIONBIO, &nonblocking);
+#else
     rc = fcntl(s, F_SETFL, fcntl(s, F_GETFL, 0) | O_NONBLOCK);
     if(rc == -1) {
         perror("fcntl failed");
         exit(1);
     }
+#endif
 
 }
 
 DiscoverySocket::~DiscoverySocket()
 {
     // Close socket
+#ifdef _MSC_VER
+    closesocket(s);
+#else
     close(s);
+#endif
 }
 
 void DiscoverySocket::sendHeartbeatIfTime(uint64_t deltaTime)
@@ -101,7 +117,7 @@ void DiscoverySocket::sendHeartbeatIfTime(uint64_t deltaTime)
         msg.port = htons(portToAnnounce);
 
         // Send heartbeat message
-        sendto(s, &msg, sizeof(msg), 0, (struct sockaddr*)&group_addr, sizeof(group_addr));
+        sendto(s, (const char*)&msg, sizeof(msg), 0, (struct sockaddr*)&group_addr, sizeof(group_addr));
     }
 }
 
@@ -113,7 +129,7 @@ bool DiscoverySocket::receiveHeartbeat(uint32_t &ip, uint16_t &port)
     HeartbeatMsg msg;
 
     // Receive (non-blocking)
-    ssize_t len = recvfrom(s, &msg, sizeof(msg), 0, (struct sockaddr*)&remote_addr, &addr_len);
+    int len = (int)recvfrom(s, (char*)&msg, sizeof(msg), 0, (struct sockaddr*)&remote_addr, &addr_len);
     if(len > 0) {
         ip = ntohl(remote_addr.sin_addr.s_addr);
         port = ntohs(msg.port);

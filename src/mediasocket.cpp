@@ -1,8 +1,13 @@
 #include <cstdio>
 #include <cstdlib>
+#ifdef _MSC_VER
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+#endif
 #include "mediasocket.hpp"
 
 MediaSocket::MediaSocket()
@@ -28,17 +33,26 @@ MediaSocket::MediaSocket()
     }
 
     // Make socket non-blocking
+#ifdef _MSC_VER
+    unsigned long nonblocking = 1;
+    ioctlsocket(s, FIONBIO, &nonblocking);
+#else
     rc = fcntl(s, F_SETFL, fcntl(s, F_GETFL, 0) | O_NONBLOCK);
     if(rc == -1) {
         perror("fcntl failed");
         exit(1);
     }
+#endif
 }
 
 MediaSocket::~MediaSocket()
 {
     // Close socket
+#ifdef _MSC_VER
+    closesocket(s);
+#else
     close(s);
+#endif
 }
 
 void MediaSocket::send(const void *buffer, int len, uint32_t ip, uint16_t port)
@@ -50,7 +64,7 @@ void MediaSocket::send(const void *buffer, int len, uint32_t ip, uint16_t port)
     remote_addr.sin_port = htons(port);
 
     // Send
-    sendto(s, buffer, len, 0, (struct sockaddr*)&remote_addr, sizeof(remote_addr));
+    sendto(s, (const char*)buffer, len, 0, (struct sockaddr*)&remote_addr, sizeof(remote_addr));
 }
 
 bool MediaSocket::receive(void *buffer, int bufLen, int &len, uint32_t &ip, uint16_t &port)
@@ -59,7 +73,7 @@ bool MediaSocket::receive(void *buffer, int bufLen, int &len, uint32_t &ip, uint
     socklen_t addr_len = sizeof(remote_addr);
 
     // Receive (non-blocking)
-    len = (int)recvfrom(s, buffer, bufLen, 0, (struct sockaddr*)&remote_addr, &addr_len);
+    len = (int)recvfrom(s, (char*)buffer, bufLen, 0, (struct sockaddr*)&remote_addr, &addr_len);
     if(len > 0) {
         ip = ntohl(remote_addr.sin_addr.s_addr);
         port = ntohs(remote_addr.sin_port);

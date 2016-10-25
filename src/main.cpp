@@ -8,6 +8,9 @@
 #include "mediasocket.hpp"
 #include "discoverysocket.hpp"
 #include "endpoint.hpp"
+#ifdef _MSC_VER
+#include <winsock2.h>
+#endif
 
 struct State {
     Encoder encoder;
@@ -18,19 +21,15 @@ static volatile bool quit = 0;
 
 int audioCallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData)
 {
-    RtpPacket packet;
-    
     State *state = (State*)userData;
     Encoder *encoder = &state->encoder;
     EndpointCollection &endpoints = state->endpoints;
-    float *in  = (float*)inputBuffer;
-    float *out = (float*)outputBuffer;
     
     // Queue audio for encoding
-    encoder->enqueueAudio(in);
+    encoder->enqueueAudio((const float*)inputBuffer);
     
     // Decode audio or conceal loss/DTX
-    endpoints.getAudio(out);
+    endpoints.getAudio((float*)outputBuffer);
     
     return 0;
 }
@@ -47,6 +46,10 @@ void intHandler(int dummy)
 
 int main()
 {
+#ifdef _MSC_VER
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
     Pa_Initialize();
     PaStream *stream;
     PaError err;

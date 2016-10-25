@@ -5,7 +5,7 @@
 
 struct RtpPacket
 {
-    unsigned char header[12] = { 0 };
+    unsigned char header[12];
     unsigned char payload[1024];
     
     void setHeader(uint16_t seqNo, uint32_t timestamp) {
